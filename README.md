@@ -1,387 +1,134 @@
-# Python-Delphi Bridge Template
+# Python ↔ Delphi Bridge
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Delphi](https://img.shields.io/badge/Delphi-12-red.svg)](https://www.embarcadero.com/products/delphi)
-[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/downloads/)
+Embed the **Python data stack** inside a **Delphi VCL** desktop app — no separate Python install on the end-user machine.
 
-A production-ready **template repository** for embedding Python into **Delphi VCL** applications using [Python4Delphi (P4D)](https://github.com/pyscripter/python4delphi) and the **Python 3.11 embeddable runtime**.
+This repo is a working starter for [Python4Delphi (P4D)](https://github.com/pyscripter/python4delphi) + the official **Python 3.11 embeddable** runtime. Delphi owns the UI and process lifetime; Python does the number-crunching and returns **JSON**.
 
-## 🎯 Overview
+## Why this exists
 
-This template provides a complete foundation for Python-Delphi integration:
-- **Delphi Application**: Manages and embeds the Python runtime (embeddable distribution)
-- **Python Bridge**: Executes data processing logic and returns structured JSON
-- **Seamless Integration**: Type-safe communication between Delphi and Python
-- **Production Ready**: Comprehensive configuration, documentation, and team workflows
+Delphi is great for Windows desktop UIs. Python is great for pandas, NumPy, and ML. Shipping both usually means:
 
-> 🚀 **Use this repository as a template** for any Python-Delphi integration project
+- installing a full Python on every PC, or
+- bolting on fragile `CreateProcess` scripts, or
+- rewriting analytics in Pascal
 
-## ✨ Features
+This template embeds Python **in-process**, so you keep one EXE workflow and call Python like a library.
 
-- 🔧 **Complete Setup**: Pre-configured submodules for Python4Delphi and embedded Python
-- 📦 **Embeddable Python**: Includes Python 3.11.9 embedded distribution as submodule
-- 🛠️ **VS Code Integration**: Optimized workspace settings for multi-language development
-- 📋 **Team Workflows**: Comprehensive documentation and contribution guidelines
-- 🔒 **Security**: Security policy and best practices for production deployment
-- 📊 **Data Processing**: Example implementation with pandas DataFrame processing
-- 🎨 **Clean Architecture**: Organized project structure with separation of concerns
+## What you get
 
----
+| Piece | Role |
+| --- | --- |
+| `app_delphi/` | VCL host that loads `python311.dll` and calls into Python |
+| `app_py/main.py` | Processing entry point; returns JSON Delphi can show or parse |
+| `external_libraries/python4delphi` | P4D submodule |
+| `external_libraries/python-3.11.9-embed-amd64` | Embeddable CPython 3.11.9 submodule |
+| `data/input/sample_points.txt` | Sample XYZ point-cloud CSV used by the demo |
 
-## 📂 Project Structure
+**Flow:** Delphi button → `Import('main')` → `main(path)` → JSON string → memo / your parser.
 
-```text
-├── README.md                   # Comprehensive documentation (all-in-one)
-├── .gitignore                  # Comprehensive ignore patterns
-├── app_delphi/                 # Delphi VCL application
-│   ├── DelphiApp.dpr          # Main project file
-│   ├── DelphiApp.dproj        # Delphi project configuration
-│   ├── forms/                 # Application forms
-│   │   └── MainForm.pas       # Main UI form
-│   └── services/              # Python integration services
-│       └── PyEngineService.pas # Python engine wrapper
-├── app_py/                     # Python processing modules
-│   ├── main.py                # Python entry point
-│   └── requirements.txt       # Python dependencies
-├── data/                       # Sample data files
-│   └── input/                 # Input data examples
-├── external_libraries/         # Git submodules
-│   ├── python4delphi/         # P4D components (submodule)
-│   └── python-3.11.9-embed-amd64/ # Embedded Python (submodule)
-└── .vscode/                    # VS Code workspace configuration
-    └── settings.json          # IDE settings
+## Quick start
+
+### 1. Clone with submodules
+
+```bash
+git clone --recurse-submodules https://github.com/juandapradam12/PythonDelphiPOC.git
+cd PythonDelphiPOC
 ```
 
----
+If you already cloned without submodules:
 
-## 🚀 Quick Start
-
-### 1. Create New Project from Template
-
-#### Option A: GitHub Template (Recommended)
-1. Click **"Use this template"** button on GitHub
-2. Create your new repository
-3. Clone with submodules:
 ```bash
-git clone --recurse-submodules https://github.com/yourusername/your-new-repo.git
-cd your-new-repo
-```
-
-#### Option B: Manual Clone
-```bash
-git clone --recurse-submodules https://github.com/juandapradam12/PythonDelphiPOC.git YOUR_PROJECT
-cd YOUR_PROJECT
-git remote remove origin
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_NEW_REPO.git
-git push -u origin main
-```
-
-### 2. Environment Setup
-
-#### Verify Submodules
-```bash
-# Check submodule status
-git submodule status
-
-# Initialize if needed
 git submodule update --init --recursive
 ```
 
-#### Install Python Dependencies
-```bash
-cd external_libraries/python-3.11.9-embed-amd64
-.\python.exe -m pip install -r ..\..\app_py\requirements.txt
+### 2. Install Python packages into the embeddable runtime
+
+From a Windows machine (PowerShell or cmd):
+
+```bat
+cd external_libraries\python-3.11.9-embed-amd64
+python.exe -m pip install -r ..\..\app_py\requirements.txt
 ```
 
-#### Configure Delphi
-1. Open `app_delphi\DelphiApp.dproj` in Delphi IDE
-2. Set **Win64** as active platform
-3. Add to Library Path:
+> Tip: embeddable Python often needs `python311._pth` adjusted (uncomment `import site`) and `get-pip.py` once before `pip` works. See the [official embeddable docs](https://docs.python.org/3/using/windows.html#the-embeddable-package).
+
+### 3. Open and run the Delphi project
+
+1. Open `app_delphi\DelphiApp.dproj` in Delphi 12 (Community or higher).
+2. Set platform to **Win64**.
+3. Add to **Library path**:
    - `external_libraries\python4delphi\Source`
    - `external_libraries\python4delphi\Source\vcl`
-4. Build and run the application
+4. Build and run.
+5. Click **Run Python Processing** (leave the memo empty to use `data/input/sample_points.txt`).
 
-### 3. Test the Integration
+### 4. Optional: test Python alone
 
-1. Run the Delphi application
-2. Enter a file path in the memo (or leave empty for default)
-3. Click **"Run Python Processing"**
-4. View JSON results returned from Python
+```bat
+external_libraries\python-3.11.9-embed-amd64\python.exe app_py\main.py data\input\sample_points.txt
+```
 
-## 📋 Example Output
-
-Input file: `data/input/sample_points.txt`
+Example response:
 
 ```json
 {
   "status": "ok",
-  "path": "C:\\YourProject\\data\\input\\sample_points.txt",
-  "rows": 3,
+  "path": "...\\data\\input\\sample_points.txt",
+  "rows": 97,
   "cols": 3,
   "columns": ["x", "y", "z"],
-  "first_row": {"x": 0.1, "y": 1.2, "z": 2.3}
+  "first_row": {"x": 381.39, "y": 430.25, "z": 109.04}
 }
 ```
 
----
+## Project layout
 
-## 🏗️ Architecture & Development
-
-### Communication Flow
-1. **Delphi → Python**: Passes file paths and parameters
-2. **Python Processing**: Executes data logic using pandas/numpy
-3. **Python → Delphi**: Returns structured JSON results
-4. **Delphi Display**: Parses and displays results in UI
-
-### Key Components
-- **PyEngineService**: Delphi service that manages Python runtime
-- **MainForm**: VCL form providing user interface
-- **main.py**: Python entry point for data processing
-- **Submodules**: External dependencies managed as Git submodules
-
-### Development Workflow
-
-#### Daily Development
-```bash
-# Pull latest changes (including submodules)
-git pull --recurse-submodules
-
-# Make changes, test thoroughly
-# ...
-
-# Commit and push
-git add .
-git commit -m "Descriptive commit message"
-git push
+```text
+├── app_delphi/                 # Delphi VCL host
+│   ├── DelphiApp.dpr
+│   ├── forms/MainForm.*        # Demo UI
+│   └── services/PyEngineService.pas   # Loads embeddable Python + sys.path
+├── app_py/
+│   ├── main.py                 # Called from Delphi
+│   └── requirements.txt
+├── data/input/                 # Sample datasets
+├── external_libraries/         # Git submodules (P4D + embeddable Python)
+├── LICENSE
+└── README.md
 ```
 
-#### Feature Development
-```bash
-# Create feature branch
-git checkout -b feature/your-feature-name
+## Extending the bridge
 
-# Work on feature, commit changes
-git add .
-git commit -m "feat: implement feature X"
-git push -u origin feature/your-feature-name
+1. Add functions in `app_py/` (keep a stable `main(...)` or import named modules from Delphi).
+2. Return JSON (or primitives P4D already maps).
+3. On the Delphi side, call via `VarPyth`:
 
-# Create pull request via GitHub
+```pascal
+PyMain := Import('main');
+PyRes  := PyMain.main(PathStr);
+Memo1.Lines.Add(VarToStr(PyRes));
 ```
 
-### Submodule Management
+`PyEngineService` resolves the project root from the EXE path (`app_delphi\Win64\Debug\...`), points `DllName` / `PythonHome` at the embeddable folder, and inserts `app_py` into `sys.path`.
 
-#### Update Python4Delphi
-```bash
-git submodule update --remote external_libraries/python4delphi
-git add external_libraries/python4delphi
-git commit -m "Update Python4Delphi to latest version"
-```
+## Requirements
 
-#### Update Python Distribution
-```bash
-git submodule update --remote external_libraries/python-3.11.9-embed-amd64
-git add external_libraries/python-3.11.9-embed-amd64
-git commit -m "Update Python embedded distribution"
-```
+- Windows x64
+- Delphi 12 (tested) with VCL
+- Git (for submodules)
+- Visual C++ Redistributable on target machines (usual for embeddable CPython)
 
-#### After Team Updates
-```bash
-# After pulling, update submodules
-git submodule update --init --recursive
-```
+## Troubleshooting
 
----
+| Symptom | Fix |
+| --- | --- |
+| `Python DLL not found` | Confirm submodule `external_libraries/python-3.11.9-embed-amd64` is checked out and contains `python311.dll` |
+| `ImportError` / missing pandas | Install deps into the **embeddable** interpreter, not system Python |
+| Delphi compile errors on `PythonEngine` | Add P4D `Source` (+ `Source\vcl`) to the library path; Win64 platform |
+| Wrong file paths at runtime | Run from a build under `app_delphi\Win64\...` so `ProjectRootFromExe` walks up to the repo root |
 
-## 🔧 Configuration & Requirements
+## License
 
-### Environment Requirements
-- **Delphi**: Community Edition or higher (tested with Delphi 12)
-- **Python**: 3.11.9 (included as embedded distribution)
-- **Git**: For submodule management
-- **VS Code**: Recommended for Python development (optional)
+MIT — see [LICENSE](LICENSE).
 
-### Testing Guidelines
-
-#### Python Testing
-```bash
-cd app_py
-..\external_libraries\python-3.11.9-embed-amd64\python.exe -m pytest tests/
-```
-
-#### Delphi Testing
-- Use DUnit or DUnitX for unit tests
-- Test Python integration thoroughly
-- Verify error handling for Python script failures
-
-### Troubleshooting
-
-#### Common Issues
-1. **Submodules not initialized**: `git submodule update --init --recursive`
-2. **Python import errors**: Check `requirements.txt` and Python path
-3. **Delphi compilation errors**: Verify library paths include P4D sources
-4. **VS Code showing many changes**: Reload window, check `.vscode/settings.json`
-
----
-
-## 🤝 Contributing & Standards
-
-### Code Standards
-
-#### Delphi Code
-- Use meaningful variable and function names
-- Include XML documentation comments for public methods
-- Follow Object Pascal naming conventions
-- Keep unit dependencies minimal and well-organized
-
-#### Python Code
-- Follow PEP 8 style guidelines
-- Use type hints where appropriate
-- Include docstrings for all public functions and classes
-- Write unit tests for new functionality
-
-### Contribution Workflow
-
-1. **Fork the Repository**: Create a fork in your GitHub account
-2. **Clone and Setup**: 
-   ```bash
-   git clone https://github.com/yourusername/PythonDelphiPOC.git
-   git submodule update --init --recursive
-   ```
-3. **Create Feature Branch**: `git checkout -b feature/your-feature-name`
-4. **Make Changes**: Follow coding standards, test thoroughly
-5. **Submit Pull Request**: Include summary, testing notes, and screenshots
-
-### Commit Message Format
-```
-type(scope): description
-
-[optional body]
-[optional footer]
-```
-
-**Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-
-**Examples**:
-- `feat(delphi): add new Python method callback system`
-- `fix(python): resolve memory leak in data processing`
-- `docs(readme): update installation instructions`
-
----
-
-## 🔒 Security & Best Practices
-
-### Security Considerations
-
-#### Python Integration Security
-- Keep embedded Python distribution updated
-- Validate all Python code execution paths
-- Sanitize data passed between Delphi and Python
-- Use appropriate error handling to prevent information disclosure
-
-#### Delphi Application Security
-- Follow secure coding practices for Windows applications
-- Validate all user inputs
-- Implement proper access controls
-- Handle sensitive data appropriately
-
-#### Development Best Practices
-1. **Input Validation**: Always validate data passed between Python and Delphi
-2. **Error Handling**: Implement comprehensive error handling
-3. **Logging**: Secure logging practices (avoid logging sensitive data)
-4. **Updates**: Keep all dependencies updated to latest secure versions
-5. **Testing**: Include security testing in development process
-
-### Deployment Considerations
-
-#### Python Dependencies
-- Keep `requirements.txt` updated
-- Consider pinning versions for production:
-```txt
-pandas==2.1.0
-numpy==1.24.3
-```
-
-#### Delphi Deployment
-- Include Python embedded distribution in deployment
-- Test on target machines without Python installed
-- Include necessary Visual C++ redistributables
-
-### Reporting Security Issues
-
-**⚠️ Do NOT create public issues for security vulnerabilities**
-
-For security issues, contact repository maintainers directly with:
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact assessment
-- Suggested fix (if available)
-
----
-
-## 📦 Customization & Template Usage
-
-### For New Projects
-
-#### Checklist
-- [ ] Repository created from template
-- [ ] Submodules initialized and working
-- [ ] Python dependencies installed
-- [ ] Delphi project compiles and runs
-- [ ] Project-specific documentation updated
-- [ ] Team access configured
-- [ ] Development branch protection rules set
-
-#### Customization
-- Modify `.gitignore` to customize ignore patterns for your project
-- Modify `app_py/requirements.txt` for Python dependencies
-- Update project structure as needed
-- Customize this README for your specific project
-
-### Best Practices for Teams
-1. **Never commit build outputs** - They're ignored by default
-2. **Keep submodules updated** - But test thoroughly
-3. **Use descriptive commit messages** - Help your future self
-4. **Test Python changes** - Both standalone and integrated
-5. **Document breaking changes** - Especially in Python interfaces
-6. **Review code changes** - Use pull requests
-7. **Keep dependencies minimal** - Only add what you really need
-8. **Version your releases** - Tag stable versions
-
----
-
-## 🆘 Support & Issues
-
-### Getting Help
-- 🐛 **Bug Reports**: Create a new issue with detailed reproduction steps
-- 💡 **Feature Requests**: Create a new issue describing your proposed feature
-- ❓ **Questions**: Create an issue with the "question" label
-- 📚 **Documentation**: Check this comprehensive guide
-- 🔗 **External Resources**: [Python4Delphi documentation](https://github.com/pyscripter/python4delphi)
-
-### Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| Latest  | :white_check_mark: |
-
----
-
-## 🎯 Roadmap
-
-- [ ] Additional Python processing examples
-- [ ] Multi-threading support
-- [ ] Enhanced error handling and logging
-- [ ] Performance optimization guides
-- [ ] Docker containerization option
-- [ ] CI/CD pipeline templates
-- [ ] Cross-platform considerations
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-**Made with ❤️ for the Delphi and Python communities**
-
-> This template consolidates all documentation into a single comprehensive guide. For the most up-to-date information and detailed examples, refer to the code in the repository.
+Python4Delphi and CPython remain under their own licenses.

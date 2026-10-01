@@ -1,5 +1,0 @@
-mkdir PythonDelphiPOC
-cd PythonDelphiPOC
-mkdir app_delphi
-mkdir app_py
-mkdir external_libraries
