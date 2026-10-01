@@ -29,7 +29,7 @@ object Form1: TForm1
     Width = 600
     Height = 35
     Align = alBottom
-    Caption = 'Run'
+    Caption = 'Run Python Processing'
     TabOrder = 1
     OnClick = BtnRunClick
     ExplicitTop = 357
