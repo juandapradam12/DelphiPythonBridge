@@ -168,8 +168,8 @@ This project targets **Win64 only** with the provided amd64 embeddable Python. W
 ### 1. Clone with submodules
 
 ```bash
-git clone --recurse-submodules https://github.com/juandapradam12/PythonDelphiPOC.git
-cd PythonDelphiPOC
+git clone --recurse-submodules https://github.com/juandapradam12/DelphiPythonBridge.git
+cd DelphiPythonBridge
 ```
 
 If you cloned without submodules:
